@@ -358,7 +358,7 @@ def pairwise_tests(
         col = within if contrast == "simple_within" else between
 
         # Extract levels of the grouping variable, sorted in alphabetical order
-        grp_col = data.groupby(col, sort=True, observed=True)[dv]
+        grp_col = data.groupby(col, sort=False, observed=True)[dv]
         labels = grp_col.groups.keys()
         # Number and labels of possible comparisons
         if len(labels) >= 2:
@@ -475,7 +475,7 @@ def pairwise_tests(
             # designs. Indeed, a similar groupby is applied by default on
             # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
-                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
+                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=False).mean()
             else:
                 tmp = data
             pt = pairwise_tests(
@@ -504,9 +504,9 @@ def pairwise_tests(
             if subject is not None:
                 data = data.set_index(subject).sort_index()
             # Extract interaction levels, sorted in alphabetical order
-            grp_fac1 = data.groupby(factors[0], observed=True, sort=True)[dv]
-            grp_fac2 = data.groupby(factors[1], observed=True, sort=True)[dv]
-            grp_both = data.groupby(factors, observed=True, sort=True)[dv]
+            grp_fac1 = data.groupby(factors[0], observed=True, sort=False)[dv]
+            grp_fac2 = data.groupby(factors[1], observed=True, sort=False)[dv]
+            grp_both = data.groupby(factors, observed=True, sort=False)[dv]
             labels_fac1 = grp_fac1.groups.keys()
             labels_fac2 = grp_fac2.groups.keys()
             # comb_fac1 = list(combinations(labels_fac1, 2))
@@ -872,7 +872,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     options.update(old_options)  # Restore original options
     df = aov.at[1, "DF"]
     ng = aov.at[0, "DF"] + 1
-    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
+    grp = data.groupby(between, sort=False, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
     # However, this does not work if between is a Categorical column, because
@@ -1038,7 +1038,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
 
     # Extract infos
     ng = data[between].nunique()
-    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
+    grp = data.groupby(between, sort=False, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
     # However, this does not work if between is a Categorical column, because
