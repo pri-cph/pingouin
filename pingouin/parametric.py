@@ -334,7 +334,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
 
 @pf.register_dataframe_method
 def rm_anova(
-    data=None, dv=None, within=None, subject=None, correction="auto", detailed=False, effsize="ng2"
+    data=None, dv=None, within=None, subject=None, correction="auto", detailed=False, effsize="ng2", s0=0
 ):
     """One-way and two-way repeated measures ANOVA.
 
@@ -568,7 +568,7 @@ def rm_anova(
     # Calculate MS, F and p-values
     ms_with = ss_with / ddof1
     ms_reswith = ss_reswith / ddof2
-    fval = ms_with / ms_reswith
+    fval = ms_with / (ms_reswith+s0)
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
@@ -669,7 +669,7 @@ def rm_anova(
     return _postprocess_dataframe(aov)
 
 
-def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
+def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2", s0=0):
     """Two-way repeated measures ANOVA.
 
     This is an internal function. The main call to this function should be done
@@ -744,9 +744,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     ms_abs = ss_abs / df_abs
 
     # F-values
-    f_a = ms_a / ms_as
-    f_b = ms_b / ms_bs
-    f_ab = ms_ab / ms_abs
+    f_a = ms_a / (ms_as+s0)
+    f_b = ms_b / (ms_bs+s0)
+    f_ab = ms_ab / (ms_abs+s0)
 
     # P-values
     p_a = f(df_a, df_as).sf(f_a)
@@ -807,7 +807,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
 
 
 @pf.register_dataframe_method
-def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="np2"):
+def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="np2", s0=0):
     """One-way and *N*-way ANOVA.
 
     Parameters
@@ -1003,7 +1003,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     ddof2 = N - n_groups
     msbetween = ssbetween / ddof1
     mserror = sserror / ddof2
-    fval = msbetween / mserror
+    fval = msbetween / (mserror+s0)
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
@@ -1044,7 +1044,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     return _postprocess_dataframe(aov)
 
 
-def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
+def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2", s0=0):
     """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
@@ -1091,9 +1091,9 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     ms_resid = ss_resid / df_resid
 
     # F-values
-    fval_fac1 = ms_fac1 / ms_resid
-    fval_fac2 = ms_fac2 / ms_resid
-    fval_inter = ms_inter / ms_resid
+    fval_fac1 = ms_fac1 / (ms_resid+s0)
+    fval_fac2 = ms_fac2 / (ms_resid+s0)
+    fval_inter = ms_inter / (ms_resid+s0)
 
     # P-values
     pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
